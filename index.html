@@ -6,109 +6,175 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Golf Weather">
+<meta name="apple-mobile-web-app-title" content="Weather">
 <meta name="theme-color" content="#13294B">
-<title>Golf Weather</title>
+<title>Weather</title>
 <link rel="apple-touch-icon" id="touchIcon" href="">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#13294B;--navy2:#22406E;--turf:#2F6B3F;--bg:#EDF1F0;--ink:#1A2230;--mute:#5B6676;--line:#D3DAD8;--card:#FFFFFF}
+:root{
+  --navy:#13294B;--ink:#0F1E33;--mute:#5E6A78;--bg:#EAF0EE;--card:#FFFFFF;--line:#DAE2DF;--row:#F2F6F5;
+  --fairway:#1F5FA8;--fairway2:#3E8CD1;
+  --g:#1B7A40;--a:#B26A00;--r:#C62828;
+  --sans:"Barlow",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --num:"Barlow Semi Condensed","Barlow",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --shadow:0 1px 2px rgba(15,30,51,.08),0 10px 30px rgba(15,30,51,.10);
+}
+@media (prefers-color-scheme:dark){:root{
+  --ink:#E7EDF3;--mute:#95A3B4;--bg:#0B1420;--card:#131F30;--line:#22314A;--row:#172538;
+  --g:#4CC47A;--a:#F0A93A;--r:#FF6B6B;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-.bar{background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 20px 18px}
-.bar h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
-.bar p{margin:4px 0 0;font-size:14px;color:#B9C8DE}
-main{max-width:520px;margin:0 auto;padding:18px 16px calc(env(safe-area-inset-bottom) + 40px)}
-section{margin-bottom:22px}
-label.h{display:block;font-size:15px;font-weight:600;margin:0 0 8px}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button{font:inherit;cursor:pointer;color:inherit}
+input:focus-visible,button:focus-visible{outline:3px solid #6FA8E8;outline-offset:2px}
+
+/* brand header */
+.top{background:linear-gradient(170deg,#13294B 0%,#17385F 70%,#1E4C5A 100%);color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 20px 52px;position:relative;overflow:hidden}
+.top .brand{display:flex;align-items:center;gap:12px;max-width:520px;margin:0 auto;position:relative;z-index:1}
+.top .mark{width:44px;height:44px;flex:0 0 44px}
+.top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
+.top p{margin:2px 0 0;font-size:15px;color:#B8C9DF}
+
+main{max-width:520px;margin:0 auto;padding:0 14px calc(env(safe-area-inset-bottom) + 40px)}
+.planner{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:18px 16px 16px;margin-top:-34px;position:relative;z-index:2}
+body.has-result .planner{margin-top:18px}
+.planner h3{margin:0 0 4px;font-size:18px;font-weight:700}
+.planner .lead{margin:0 0 14px;font-size:14px;color:var(--mute)}
+label.h{display:block;font-size:14px;font-weight:600;color:var(--mute);margin:16px 0 8px}
+label.h:first-of-type{margin-top:0}
 .row{display:flex;gap:8px}
-input[type=text],input[type=search]{flex:1;min-width:0;font:inherit;font-size:17px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
-input:focus-visible,button:focus-visible{outline:3px solid #6C9BE0;outline-offset:2px}
-button{font:inherit;cursor:pointer}
-.btn{border:0;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;background:var(--navy);color:#fff}
-.btn.alt{background:var(--card);color:var(--navy);border:1px solid var(--line)}
-.btn.wide{width:100%;padding:15px;font-size:17px}
+input[type=text],input[type=search]{flex:1;min-width:0;font:inherit;font-size:17px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);-webkit-appearance:none}
+input::placeholder{color:var(--mute)}
+.btn{border:0;border-radius:12px;padding:13px 18px;font-size:16px;font-weight:600;background:var(--navy);color:#fff}
+@media (prefers-color-scheme:dark){.btn{background:#2A5AA0}}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.go{width:100%;margin-top:18px;padding:16px;font-size:18px;font-weight:700;background:var(--fairway);display:flex;align-items:center;justify-content:center;gap:10px}
+.btn.go svg{width:20px;height:20px}
 .btn:disabled{opacity:.4}
-.list{margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.list button{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:11px 14px;color:var(--ink)}
+.locbtn{margin-top:8px;width:100%;border:1px dashed var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:11px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+.locbtn svg{width:17px;height:17px;color:var(--fairway2)}
+.list{margin-top:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.list button{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:11px 14px}
 .list button:first-child{border-top:0}
-.list b{display:block;font-size:16px}
+.list b{display:block;font-size:16px;font-weight:600}
 .list span{display:block;font-size:13px;color:var(--mute);margin-top:2px}
-.flag{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--turf);margin-right:6px;vertical-align:1px}
-.locbtn{margin-top:8px;width:100%;border:1px solid var(--line);background:var(--card);color:var(--navy);border-radius:10px;padding:11px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
-.locbtn svg{width:16px;height:16px}
-.recent{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.recent button{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:7px 12px;font-size:14px;color:var(--navy)}
-.picked{margin-top:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--turf);border-radius:10px;padding:10px 12px}
+.flag{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--fairway2);margin-right:7px;vertical-align:2px}
+.recent{display:flex;gap:6px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+.recent::-webkit-scrollbar{display:none}
+.recent button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-size:14px;font-weight:500}
+.picked{margin-top:10px;background:var(--bg);border-radius:12px;padding:10px 12px;border-left:4px solid var(--fairway2)}
 .picked small{display:block;color:var(--mute);font-size:13px;margin-bottom:6px}
-.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.picked input{background:var(--card)!important}
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
 .days::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;text-align:center;color:var(--ink);min-width:74px}
-.chip span{display:block;font-size:12px;color:var(--mute)}
-.chip b{display:block;font-size:15px;margin-top:2px}
-.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
-.chip.on span{color:#B9C8DE}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 10px;text-align:center;min-width:66px}
+.chip span{display:block;font-size:12px;color:var(--mute);font-weight:500}
+.chip b{display:block;font-family:var(--num);font-size:17px;font-weight:600;margin-top:1px}
+.chip.on{background:var(--fairway);border-color:var(--fairway);color:#fff}
+.chip.on span{color:#CFE0F5}
 .status{font-size:14px;color:var(--mute);margin:10px 2px 0;min-height:1.2em}
-.status.err{color:#B3261E}
-#out{display:none;margin:0 -10px 26px}
-body.has-result .bar{display:none}
-body.has-result main{padding-top:calc(env(safe-area-inset-top) + 6px)}
+.status.err{color:var(--r)}
+
+/* result */
+#out{display:none;margin:0 -14px}
 #out.show{display:block}
-.fc{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(19,41,75,.12),0 6px 18px rgba(19,41,75,.10)}
-.fc-head{background:var(--navy);color:#fff;padding:8px 10px 7px}
-.fc-head h2{margin:0;font-size:18px;line-height:1.15;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fc-head .l2{display:flex;justify-content:space-between;gap:8px;margin-top:2px;font-size:13px;color:#C3D1E6}
-.fc-head .l2 b{color:#fff;white-space:nowrap}
-.fc-sub{font-size:10.5px;color:#4A5568;padding:4px 8px 3px;line-height:1.3;display:flex;flex-wrap:wrap;column-gap:10px}
-.fc-sub span{white-space:nowrap}
-table.wx{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(14px,4.6vw,20px);font-variant-numeric:tabular-nums}
-table.wx th{background:var(--navy);color:#fff;font-weight:700;font-size:.7em;line-height:1.1;padding:3px 1px;text-align:center}
-table.wx td{padding:0 1px;height:var(--rh,32px);text-align:center;white-space:nowrap;border-bottom:1px solid #D8DFE9;color:#1A2230}
-table.wx tr:nth-child(even) td{background:#EDF1F7}
-table.wx td.t{font-weight:700;color:var(--navy)}
-table.wx td.sky canvas{display:block;margin:0 auto;width:min(1.7em,calc(var(--rh,34px) - 3px));height:min(1.7em,calc(var(--rh,34px) - 3px))}
-.arr{display:block;margin:0 auto;width:1.15em;height:1.15em;color:var(--navy)}
-table.wx td.tf{font-weight:600}
-table.wx td.g{color:#1E7B34;font-weight:600}
-table.wx td.a{color:#B86E00;font-weight:600}
-table.wx td.r{color:#C62828;font-weight:800}
-.fc-foot{padding:7px 10px 10px;font-size:10.5px;line-height:1.4;color:#6B7686}
-.fc-foot .u{color:#3D4859;margin-bottom:3px}
-.actions{display:flex;gap:8px;margin:12px 10px 0}
-.actions .btn{flex:1}
+body.has-result .top{display:none}
+.hero{position:relative;color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 20px 64px;overflow:hidden}
+.hero.sun{background:linear-gradient(165deg,#1C5FA8 0%,#3E8CD1 55%,#8CC4EA 100%)}
+.hero.part{background:linear-gradient(165deg,#244F82 0%,#4B7DAF 55%,#A3C0DA 100%)}
+.hero.cloud{background:linear-gradient(165deg,#34465E 0%,#5B6E86 55%,#9DAABB 100%)}
+.hero.wet{background:linear-gradient(165deg,#1F2F44 0%,#3E5169 55%,#72849A 100%)}
+.hero.storm{background:linear-gradient(165deg,#1A1D30 0%,#383E5C 60%,#5F6688 100%)}
+.hero.snow{background:linear-gradient(165deg,#4D6684 0%,#7D96B3 55%,#CAD7E5 100%)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hero h2{margin:0;font-size:26px;line-height:1.1;font-weight:700;letter-spacing:-.01em;text-shadow:0 1px 8px rgba(0,0,0,.18)}
+.hero .date{margin:4px 0 0;font-size:15px;color:rgba(255,255,255,.85)}
+.hero .pill{flex:0 0 auto;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 11px;font-family:var(--num);font-size:14px;font-weight:600;white-space:nowrap;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hero-main{display:flex;align-items:center;gap:14px;margin-top:14px;position:relative;z-index:1}
+.hero-main canvas{width:84px;height:84px;flex:0 0 84px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.15))}
+.hero .temp{font-family:var(--num);font-size:64px;line-height:.9;font-weight:600;letter-spacing:-.02em}
+.hero .temp small{font-size:28px;font-weight:500;color:rgba(255,255,255,.72);letter-spacing:0}
+.hero .cond{font-size:17px;font-weight:600;margin-top:6px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-radius:16px;box-shadow:var(--shadow);margin:-40px 14px 0;position:relative;z-index:2;padding:12px 4px}
+.stats div{text-align:center;padding:0 4px;border-left:1px solid var(--line)}
+.stats div:first-child{border-left:0}
+.stats span{display:block;font-size:12px;color:var(--mute);font-weight:500;white-space:nowrap}
+.stats b{display:block;font-family:var(--num);font-size:21px;font-weight:600;margin-top:2px;white-space:nowrap}
+.stats b small{font-size:13px;font-weight:500;color:var(--mute);margin-left:1px}
+.stats .g{color:var(--g)}.stats .a{color:var(--a)}.stats .r{color:var(--r)}
+
+.best{display:flex;align-items:center;gap:10px;margin:12px 14px 0;padding:11px 14px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:15px}
+.best svg{width:22px;height:22px;flex:0 0 22px;color:var(--fairway2)}
+.best b{font-family:var(--num);font-size:17px;font-weight:600}
+.best span{color:var(--mute);margin-left:auto;font-size:13px;white-space:nowrap}
+
+.panel{background:var(--card);border-radius:16px;box-shadow:var(--shadow);margin:12px 14px 0;overflow:hidden}
+table.wx{width:100%;border-collapse:collapse;table-layout:fixed;font-family:var(--num);font-size:clamp(15px,4.6vw,20px);font-variant-numeric:tabular-nums}
+table.wx th{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--mute);line-height:1.15;padding:10px 1px 8px;text-align:center;border-bottom:1px solid var(--line)}
+table.wx td{padding:0 1px;height:var(--rh,38px);text-align:center;white-space:nowrap;font-weight:500;border-bottom:1px solid var(--line)}
+table.wx tr:last-child td{border-bottom:0}
+table.wx tr:nth-child(even) td{background:var(--row)}
+table.wx tr.bw td{background:rgba(62,140,209,.12)}
+table.wx tr.bw td:first-child{box-shadow:inset 4px 0 0 var(--fairway2)}
+table.wx td.t{font-weight:700}
+table.wx td.sky canvas{display:block;margin:0 auto;width:min(1.75em,calc(var(--rh,38px) - 4px));height:min(1.75em,calc(var(--rh,38px) - 4px))}
+table.wx td.tf{font-weight:700}
+table.wx td.g{color:var(--g);font-weight:600}
+table.wx td.a{color:var(--a);font-weight:700}
+table.wx td.r{color:var(--r);font-weight:700}
+table.wx td .dim{color:var(--mute);font-weight:500}
+.arr{display:block;margin:0 auto;width:1.1em;height:1.1em;color:var(--ink)}
+.fc-foot{padding:10px 14px 12px;font-size:12px;line-height:1.45;color:var(--mute);border-top:1px solid var(--line)}
+.fc-foot .u{color:var(--ink);opacity:.8;margin-bottom:4px}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 14px 0}
+.actions .btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 6px;font-size:14px}
+.actions .btn svg{width:20px;height:20px}
+@media (prefers-reduced-motion:no-preference){
+  #out.show .hero-main{animation:rise .5s ease-out both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
 </style>
 </head>
 <body>
-<div class="bar">
-  <h1>Golf Weather</h1>
-  <p>Hour-by-hour consensus from seven forecast models</p>
-</div>
+<header class="top">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="mk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C5FA8"/><stop offset="1" stop-color="#6FB0E3"/></linearGradient></defs><rect width="44" height="44" rx="11" fill="url(#mk)"/><circle cx="17" cy="17" r="7" fill="#FFC21A"/><path d="M14 33h19a6 6 0 000-12 8 8 0 00-15.3 2.2A5 5 0 0014 33z" fill="#fff"/></svg>
+    <div><h1>Weather</h1><p>Seven forecast models, one hourly consensus</p></div>
+  </div>
+</header>
 <main>
   <section id="out">
-    <div class="fc" id="fc"></div>
+    <div id="hero"></div>
+    <div class="panel"><div id="fc"></div></div>
     <div class="actions">
-      <button class="btn alt" id="share">Share as PDF</button>
-      <button class="btn alt" id="refresh">Refresh</button>
+      <button class="btn alt" id="share" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>Share PDF</button>
+      <button class="btn alt" id="refresh" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Refresh</button>
+      <button class="btn alt" id="change" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Change</button>
     </div>
   </section>
-  <section>
-    <label class="h" for="q">Course</label>
+  <section class="planner" id="planner">
+    <h3>Check the forecast</h3>
+    <p class="lead">Pick a place and a day for an hour-by-hour forecast.</p>
+    <label class="h" for="q">Place</label>
     <form class="row" id="searchForm" onsubmit="return false">
-      <input id="q" type="search" placeholder="Club name, town, or 53.45, -6.12" autocomplete="off" enterkeyhint="search">
+      <input id="q" type="search" placeholder="City, town or place" autocomplete="off" enterkeyhint="search">
       <button class="btn" id="searchBtn" type="submit">Find</button>
     </form>
     <button class="locbtn" id="locBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Use my location</button>
     <div id="results"></div>
     <div id="picked"></div>
     <div class="recent" id="recent"></div>
-  </section>
-  <section>
     <label class="h">Day</label>
     <div class="days" id="days"></div>
+    <button class="btn go" id="go" type="button" disabled>Show forecast</button>
+    <div class="status" id="status"></div>
   </section>
-  <button class="btn wide" id="go" disabled>Build forecast</button>
-  <div class="status" id="status"></div>
 </main>
 
 <script>
@@ -159,7 +225,7 @@ function buildDays(){
     const wd=d.toLocaleDateString('en-GB',{weekday:'short'});
     b.innerHTML=`<span>${i===0?'Today':i===1?'Tomorrow':wd}</span><b>${d.getDate()} ${MON[d.getMonth()]}</b>`;
     b.onclick=()=>{ dayISO=iso; [...box.children].forEach(c=>c.classList.toggle('on',c===b)); updateGo(); };
-    const def=now.getHours()<14?0:1; if(i===def){ dayISO=iso; b.classList.add('on'); }
+    if(i===0){ dayISO=iso; b.classList.add('on'); }
     box.appendChild(b);
   }
 }
@@ -178,7 +244,7 @@ async function search(){
   const q=$('#q').value.trim(); if(!q) return;
   $('#q').blur();
   const m=q.match(/^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,; ]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
-  if(m){ pick({name:'Golf course', sub:'Coordinates '+m[1]+', '+m[2], lat:+m[1], lon:+m[2]}); return; }
+  if(m){ pick({name:'Pinned location', sub:'Coordinates '+m[1]+', '+m[2], lat:+m[1], lon:+m[2]}); return; }
   setStatus('Searching…');
   let res=[];
   try{
@@ -186,24 +252,23 @@ async function search(){
     if(r.ok){
       const j=await r.json();
       res=j.map(x=>{ const parts=x.display_name.split(',').map(s=>s.trim());
-        return {name:x.name||parts[0], sub:parts.slice(1,4).join(', '), lat:+x.lat, lon:+x.lon, golf:x.type==='golf_course'}; });
+        return {name:x.name||parts[0], sub:parts.slice(1,4).join(', '), lat:+x.lat, lon:+x.lon}; });
     }
   }catch(e){}
   if(!res.length){
     try{
-      const name=q.replace(/\bgolf( club| links| course| resort)?\b/ig,'').trim()||q;
+      const name=q;
       const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=en&format=json&name='+encodeURIComponent(name));
       const j=await r.json();
       res=(j.results||[]).map(x=>({name:x.name, sub:[x.admin1,x.country].filter(Boolean).join(', '), lat:x.latitude, lon:x.longitude}));
     }catch(e){}
   }
-  res.sort((a,b)=>(b.golf?1:0)-(a.golf?1:0));
   if(!res.length){ $('#results').innerHTML=''; setStatus('No match for “'+q+'”. Try the club’s full name, or paste coordinates like 53.45, -6.12.', true); return; }
   setStatus('');
   const box=document.createElement('div'); box.className='list';
   res.forEach(v=>{
     const b=document.createElement('button'); b.type='button';
-    b.innerHTML=`<b>${v.golf?'<i class="flag"></i>':''}${esc(v.name)}</b><span>${esc(v.sub)}</span>`;
+    b.innerHTML=`<b>${esc(v.name)}</b><span>${esc(v.sub)}</span>`;
     b.onclick=()=>pick(v); box.appendChild(b);
   });
   $('#results').innerHTML=''; $('#results').appendChild(box);
@@ -223,15 +288,6 @@ function distKm(a,b,c,d){
 }
 async function nameFor(lat,lon){
   try{
-    const d=0.03;
-    const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&accept-language=en&bounded=1&q=golf%20course&viewbox=${lon-d*2},${lat+d},${lon+d*2},${lat-d}`);
-    if(r.ok){
-      const g=(await r.json()).filter(x=>x.type==='golf_course'&&x.name)
-        .map(x=>({name:x.name,km:distKm(lat,lon,+x.lat,+x.lon)})).sort((a,b)=>a.km-b.km);
-      if(g.length && g[0].km<2.5) return {name:g[0].name, golf:true};
-    }
-  }catch(e){}
-  try{
     const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&accept-language=en&lat=${lat}&lon=${lon}`);
     if(r.ok){ const j=await r.json(), a=j.address||{};
       const n=a.village||a.town||a.city||a.suburb||a.municipality||j.name;
@@ -250,8 +306,8 @@ async function useMyLocation(auto){
   }
   const lat=+c.latitude.toFixed(4), lon=+c.longitude.toFixed(4);
   const n=await nameFor(lat,lon);
-  pick({name:n.name, sub:'Your location'+(n.golf?'':(n.sub?' near '+n.sub:'')), lat, lon});
-  build({save:!!n.golf});
+  pick({name:n.name, sub:'Your location'+(n.sub?', '+n.sub:''), lat, lon});
+  build({save:false});
 }
 
 /* ---------- data ---------- */
@@ -288,6 +344,10 @@ function classify(codes, cloud, mm, rain, vis){
   return {t:'Overcast', i:'overcast'};
 }
 
+function nightSky(k){
+  const m={sunny:['Clear','clearnight'],mostsun:['Mostly clear','mostnight'],partly:['Partly cloudy','partnight'],showers:[k.t,'rain']};
+  return m[k.i]?{t:m[k.i][0],i:m[k.i][1]}:k;
+}
 function consensus(multi, best){
   const H=multi.hourly||{}, B=best.hourly||{};
   const used=MODELS.filter(m=>{ const a=H['temperature_2m_'+m.id]; return a && a.some(ok); });
@@ -295,9 +355,13 @@ function consensus(multi, best){
   const sr=best.daily&&best.daily.sunrise&&best.daily.sunrise[0];
   const ss=best.daily&&best.daily.sunset&&best.daily.sunset[0];
   const hm=s=>{ const t=s.slice(11,16).split(':'); return (+t[0])*60+(+t[1]); };
-  let h0=7, h1=20;
-  if(sr && ss){ h0=Math.round(hm(sr)/60); h1=Math.min(23,Math.round(hm(ss)/60)); }
-  if(h1<=h0){ h0=7; h1=20; }
+  const srM=sr?hm(sr):null, ssM=ss?hm(ss):null;
+  let h0=0, h1=23;
+  if(best.utc_offset_seconds!=null){
+    const now=new Date(Date.now()+best.utc_offset_seconds*1000);
+    const today=now.toISOString().slice(0,10);
+    if(B.time&&B.time[0]&&B.time[0].slice(0,10)===today) h0=now.getUTCHours();
+  }
   const rows=[];
   (B.time||[]).forEach((tm,i)=>{
     const hour=+tm.slice(11,13); if(hour<h0||hour>h1) return;
@@ -316,13 +380,15 @@ function consensus(multi, best){
     let dir = nd ? (Math.atan2(x,y)*180/Math.PI+360)%360 : b('wind_direction_10m');
     const va=g('visibility'); const vis=va.length?median(va):b('visibility');
     const codes=g('weather_code'); const bc=b('weather_code'); if(ok(bc)) codes.push(bc);
-    const sky=classify(codes, cloud, mm, rain, vis);
+    const daySky=classify(codes, cloud, mm, rain, vis);
+    const mid=hour*60+30, night=(srM!=null&&ssM!=null)&&(mid<srM||mid>ssM);
+    const sky=night?nightSky(daySky):daySky;
     let visW;
     if(sky.i==='fog') visW='Poor';
     else if(!ok(vis)) visW = sky.i==='heavy'||sky.i==='snow' ? 'Moderate' : 'Good';
     else visW = vis<4000?'Poor':vis<10000?'Moderate':'Good';
     if(ok(wind)) gust=Math.max(ok(gust)?gust:wind, wind);
-    rows.push({hour, sky, rain, mm, temp, feels, wind, gust, dir, hum, vis:visW});
+    rows.push({hour, sky, daySky, night, rain, mm, temp, feels, wind, gust, dir, hum, vis:visW});
   });
   return {rows, used, sr, ss, uv: best.daily&&best.daily.uv_index_max?best.daily.uv_index_max[0]:null,
           tz: best.timezone, tzAbbr: best.timezone_abbreviation, h0, h1};
@@ -339,6 +405,10 @@ function sun(c,x,y,r){
   c.save(); c.strokeStyle='#F0A500'; c.lineWidth=r*0.24; c.lineCap='round';
   for(let k=0;k<8;k++){ const a=k*Math.PI/4; c.beginPath(); c.moveTo(x+Math.cos(a)*r*1.4,y+Math.sin(a)*r*1.4); c.lineTo(x+Math.cos(a)*r*1.85,y+Math.sin(a)*r*1.85); c.stroke(); }
   c.fillStyle='#FFC21A'; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); c.restore();
+}
+function moon(c,x,y,r){
+  c.save(); c.beginPath(); c.rect(x-3*r,y-3*r,6*r,6*r); c.arc(x+r*0.55,y-r*0.4,r*0.85,0,Math.PI*2); c.clip('evenodd');
+  c.fillStyle='#E6D98A'; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); c.restore();
 }
 function cloud(c,x,y,w,fill){
   c.save(); c.fillStyle=fill;
@@ -362,6 +432,9 @@ function icon(c,kind,x,y,s){
     case 'sunny': sun(c,x,y,s*0.2); break;
     case 'mostsun': sun(c,x-0.1*s,y-0.08*s,s*0.19); cloud(c,x+0.14*s,y+0.14*s,0.58*s,CL); break;
     case 'partly': sun(c,x-0.14*s,y-0.14*s,s*0.18); cloud(c,x+0.05*s,y+0.1*s,0.82*s,CL); break;
+    case 'clearnight': moon(c,x,y,s*0.26); break;
+    case 'mostnight': moon(c,x-0.1*s,y-0.08*s,s*0.22); cloud(c,x+0.14*s,y+0.14*s,0.58*s,CL); break;
+    case 'partnight': moon(c,x-0.12*s,y-0.14*s,s*0.21); cloud(c,x+0.05*s,y+0.1*s,0.82*s,CL); break;
     case 'cloudy': cloud(c,x,y+0.05*s,0.92*s,CM); break;
     case 'overcast': cloud(c,x+0.13*s,y-0.1*s,0.7*s,CL); cloud(c,x-0.04*s,y+0.1*s,0.86*s,CD); break;
     case 'fog': { c.save(); c.strokeStyle=CM; c.lineWidth=s*0.08; c.lineCap='round';
@@ -401,7 +474,7 @@ function draw(cv, D){
   F(c,fitSize(c,D.title,6.2,700,PW-10),700); c.fillText(D.title,5,8.6);
   const [Y,Mo,Da]=D.day.split('-').map(Number); const dd=new Date(Y,Mo-1,Da);
   const dateStr=dd.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const span=`Golf ${String(D.h0).padStart(2,'0')}:00–${String(D.h1).padStart(2,'0')}:00`;
+  const span=`${String(D.h0).padStart(2,'0')}:00–${String(D.h1).padStart(2,'0')}:00`;
   F(c,3.3,700); const spanW=c.measureText(span).width;
   c.textAlign='right'; c.fillText(span,PW-5,15.6);
   c.fillStyle='#C3D1E6'; c.textAlign='left'; F(c,fitSize(c,dateStr,3.3,400,PW-12-spanW),400); c.fillText(dateStr,5,15.6);
@@ -490,49 +563,91 @@ function draw(cv, D){
 /* ---------- html result ---------- */
 let lastD=null;
 const TS='\u2009/\u2009';
-function iconCanvas(kind){
-  const px=28, dpr=Math.max(2,window.devicePixelRatio||2);
+function iconCanvas(kind,size){
+  const px=size||28, dpr=Math.max(2,window.devicePixelRatio||2);
   const cv=document.createElement('canvas'); cv.width=cv.height=px*dpr;
   const c=cv.getContext('2d'); c.scale(dpr,dpr); icon(c,kind,px/2,px/2,px); return cv;
 }
+function skyClass(i){
+  return {sunny:'sun',mostsun:'sun',partly:'part',cloudy:'cloud',overcast:'cloud',fog:'cloud',
+    drizzle:'wet',rain:'wet',showers:'wet',heavy:'wet',thunder:'storm',snow:'snow',sleet:'snow'}[i]||'part';
+}
+function bestWindow(rows){
+  const idx=rows.map((r,i)=>r.night?-1:i).filter(i=>i>=0);
+  if(idx.length<2) return null;
+  const f=idx[0], n=idx.length, w=Math.min(4,n);
+  let bi=f, bs=Infinity;
+  for(let s=f;s+w<=f+n;s++){
+    let sc=0; for(let k=s;k<s+w;k++){ const r=rows[k];
+      sc+=r.rain+(r.mm||0)*25+(ok(r.gust)?r.gust:0)*1.5+(ok(r.temp)?Math.max(0,18-r.temp)*2:0); }
+    if(sc<bs-1e-9){ bs=sc; bi=s; }
+  }
+  const seg=rows.slice(bi,bi+w);
+  return {from:bi, to:bi+w-1, h0:rows[bi].hour, h1:rows[bi+w-1].hour+1, rain:Math.max(...seg.map(r=>r.rain))};
+}
 function renderHTML(D){
   const [Y,Mo,Da]=D.day.split('-').map(Number);
-  const dateStr=new Date(Y,Mo-1,Da).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const dateStr=new Date(Y,Mo-1,Da).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
   const p2=n=>String(n).padStart(2,'0');
   const coord=`${Math.abs(D.lat).toFixed(4)}°${D.lat>=0?'N':'S'} ${Math.abs(D.lon).toFixed(4)}°${D.lon>=0?'E':'W'}`;
   const srcs=D.used.map(m=>{ const r=runLabel(D.metas[MODELS.indexOf(m)]); return m.name+(r?' ('+r+')':''); }).join(', ');
   const issued=D.issued.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
   const r0=v=>ok(v)?Math.round(v):'–';
+  const R=D.rows;
+
+  // day summary
+  const DR=R.some(r=>!r.night)?R.filter(r=>!r.night):R;
+  const cnt={}; DR.forEach(r=>{ const k=r.daySky.t; cnt[k]=(cnt[k]||0)+1; });
+  const domT=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+  const dom=DR.find(r=>r.daySky.t===domT).daySky;
+  const temps=R.map(r=>r.temp).filter(ok);
+  const hi=temps.length?Math.round(Math.max(...temps)):'–', lo=temps.length?Math.round(Math.min(...temps)):'–';
+  const maxRain=Math.max(...R.map(r=>r.rain));
+  const rc=maxRain>=35?'r':maxRain>=25?'a':'g';
+  const totMm=R.reduce((s,r)=>s+(r.mm||0),0);
+  const gusts=R.map(r=>r.gust).filter(ok); const maxG=gusts.length?Math.round(Math.max(...gusts)):'–';
+  const bw=bestWindow(R);
+
+  $('#hero').innerHTML=`<div class="hero ${skyClass(dom.i)}">
+      <div class="hero-top"><div><h2>${esc(D.title)}</h2><p class="date">${dateStr}</p></div><span class="pill">${p2(D.h0)}:00–${p2(D.h1)}:00</span></div>
+      <div class="hero-main"><span id="bigIcon"></span><div><div class="temp">${hi}°<small> / ${lo}°</small></div><div class="cond">${esc(dom.t)}</div></div></div>
+    </div>
+    <div class="stats">
+      <div><span>Rain chance</span><b class="${rc}">${maxRain}<small>%</small></b></div>
+      <div><span>Rain total</span><b>${totMm<0.05?'0':totMm<10?totMm.toFixed(1):Math.round(totMm)}<small>mm</small></b></div>
+      <div><span>Max gust</span><b>${maxG}<small>m/s</small></b></div>
+      <div><span>UV max</span><b>${ok(D.uv)?Math.round(D.uv):'–'}</b></div>
+    </div>
+    ${bw?`<div class="best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><div>Best time outside <b>${p2(bw.h0)}:00–${p2(bw.h1)}:00</b></div><span>rain ≤ ${bw.rain}%</span></div>`:''}`;
+  $('#bigIcon').replaceWith(iconCanvas(dom.i,84));
+
   let rows='';
-  D.rows.forEach((r,i)=>{
-    const rc=r.rain>=35?'r':r.rain>=25?'a':'g';
+  R.forEach((r,i)=>{
+    const c=r.rain>=35?'r':r.rain>=25?'a':'g';
     const mm=r.mm<0.05?'–':(r.mm<10?r.mm.toFixed(1):Math.round(r.mm));
     const arrow=ok(r.dir)?`<svg class="arr" viewBox="0 0 24 24" style="transform:rotate(${Math.round((r.dir+180)%360)}deg)" role="img" aria-label="Wind from ${compass(r.dir)}"><path d="M12 2.5l7 9.5h-4.6v9.5H9.6V12H5z" fill="currentColor"/></svg>`:'–';
-    rows+=`<tr><td class="t">${p2(r.hour)}:00</td><td class="sky" data-i="${i}" title="${esc(r.sky.t)}"></td>`+
-      `<td class="${rc}">${r.rain}%</td><td>${mm}</td><td class="tf">${r0(r.temp)}${TS}${r0(r.feels)}</td>`+
-      `<td>${r0(r.wind)}${TS}${r0(r.gust)}</td><td>${arrow}</td></tr>`;
+    const inBw=bw&&i>=bw.from&&i<=bw.to;
+    rows+=`<tr${inBw?' class="bw"':''}><td class="t">${p2(r.hour)}:00</td><td class="sky" data-i="${i}" title="${esc(r.sky.t)}"></td>`+
+      `<td class="${c}">${r.rain}%</td><td>${mm}</td><td class="tf">${r0(r.temp)}°<span class="dim">${TS}${r0(r.feels)}°</span></td>`+
+      `<td>${r0(r.wind)}<span class="dim">${TS}${r0(r.gust)}</span></td><td>${arrow}</td></tr>`;
   });
   $('#fc').innerHTML=`
-    <div class="fc-head"><h2>${esc(D.title)}</h2><div class="l2"><span>${dateStr}</span><b>Golf ${p2(D.h0)}:00–${p2(D.h1)}:00</b></div></div>
-    <div class="fc-sub"><span>${coord}</span><span>Sunrise ${hhmm(D.sr)}</span><span>Sunset ${hhmm(D.ss)}</span><span>UV max ${ok(D.uv)?Math.round(D.uv):'–'}</span><span>${esc(D.tz||'')}${D.tzAbbr?' ('+esc(D.tzAbbr)+')':''}</span></div>
     <table class="wx">
-      <colgroup><col style="width:15.5%"><col style="width:12%"><col style="width:13.5%"><col style="width:11%"><col style="width:19%"><col style="width:18%"><col style="width:11%"></colgroup>
+      <colgroup><col style="width:15.5%"><col style="width:12%"><col style="width:13.5%"><col style="width:10.5%"><col style="width:20%"><col style="width:17.5%"><col style="width:11%"></colgroup>
       <thead><tr><th>Time</th><th>Sky</th><th>Rain</th><th>mm</th><th>°C /<br>feels</th><th>Wind /<br>gust</th><th>Dir</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="fc-foot"><div class="u">°C temp / feels like. Wind and gust m/s; arrow points where the wind blows to. mm = expected rain that hour.</div>
-    Consensus of ${D.used.length} models via Open-Meteo, runs in UTC: ${esc(srcs)}. Issued ${issued}.</div>`;
+    <div class="fc-foot"><div class="u">Wind and gust in m/s; the arrow points where the wind blows to. mm is expected rain that hour. Sunrise ${hhmm(D.sr)}, sunset ${hhmm(D.ss)}.</div>
+    ${coord}, ${esc(D.tz||'')}${D.tzAbbr?' ('+esc(D.tzAbbr)+')':''}. Consensus of ${D.used.length} models via Open-Meteo, runs in UTC: ${esc(srcs)}. Issued ${issued}.</div>`;
   $('#fc').querySelectorAll('td.sky').forEach(d=>d.appendChild(iconCanvas(D.rows[+d.dataset.i].sky.i)));
 }
 
 function fitRows(){
   const tb=document.querySelector('#fc tbody'); if(!tb) return;
   const n=tb.rows.length||1;
-  const top=tb.getBoundingClientRect().top+window.scrollY;
-  const avail=window.innerHeight-top-4;
-  const rh=Math.max(23,Math.min(46,Math.floor(avail/n)));
+  const rh=Math.max(32,Math.min(46,Math.floor((window.innerHeight-110)/n)));
   tb.style.setProperty('--rh',rh+'px');
-  tb.style.fontSize=Math.min(20,Math.max(14,rh*0.6))+'px';
+  tb.style.fontSize=Math.min(20,Math.max(15,rh*0.5))+'px';
 }
 window.addEventListener('resize',()=>requestAnimationFrame(fitRows));
 
@@ -550,7 +665,7 @@ async function build(opts){
   if(!venue||!dayISO) return;
   const keep=!(opts&&opts.save===false);
   const title=($('#title')&&$('#title').value.trim())||venue.name;
-  $('#go').disabled=true; setStatus('Fetching forecasts from '+MODELS.length+' models…');
+  $('#go').disabled=true; setStatus('Checking '+MODELS.length+' forecast models…');
   try{
     const base=`https://api.open-meteo.com/v1/forecast?latitude=${venue.lat.toFixed(4)}&longitude=${venue.lon.toFixed(4)}&timezone=auto&wind_speed_unit=ms&start_date=${dayISO}&end_date=${dayISO}`;
     const metaP=Promise.all(MODELS.map(m=>fetch(`https://api.open-meteo.com/data/${m.meta}/static/meta.json`).then(r=>r.ok?r.json():null).catch(()=>null)));
@@ -596,9 +711,9 @@ async function sharePdf(){
 function makeTouchIcon(){
   try{
     const cv=document.createElement('canvas'); cv.width=cv.height=180; const c=cv.getContext('2d');
-    c.fillStyle=NAVY; c.fillRect(0,0,180,180);
-    c.fillStyle='#2F6B3F'; c.fillRect(0,132,180,48);
-    icon(c,'partly',92,78,120);
+    const g=c.createLinearGradient(0,0,0,180); g.addColorStop(0,'#1C5FA8'); g.addColorStop(1,'#8CC4EA');
+    c.fillStyle=g; c.fillRect(0,0,180,180);
+    icon(c,'partly',90,92,150);
     $('#touchIcon').href=cv.toDataURL('image/png');
   }catch(e){}
 }
@@ -606,6 +721,7 @@ function makeTouchIcon(){
 $('#searchForm').addEventListener('submit',search);
 $('#go').addEventListener('click',build);
 $('#share').addEventListener('click',sharePdf);
+$('#change').addEventListener('click',()=>{ $('#planner').scrollIntoView({behavior:'smooth',block:'start'}); setTimeout(()=>$('#q').focus(),350); });
 $('#refresh').addEventListener('click',()=>build({save:false}));
 $('#locBtn').addEventListener('click',()=>useMyLocation(false));
 buildDays(); renderRecents(); makeTouchIcon();
