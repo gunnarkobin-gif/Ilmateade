@@ -130,6 +130,9 @@ table.wx td .dim{color:var(--mute);font-weight:500}
 .arr{display:block;margin:0 auto;width:1em;height:1em;color:var(--ink)}
 .fc-foot{padding:10px 14px 12px;font-size:12px;line-height:1.45;color:var(--mute);border-top:1px solid var(--line)}
 .fc-foot .u{color:var(--ink);opacity:.8;margin-bottom:4px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 12px 0}
+.actions .btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;font-size:15px}
+.actions .btn svg{width:18px;height:18px}
 #sb{position:fixed;left:0;bottom:0;height:env(safe-area-inset-bottom);width:0;pointer-events:none}
 </style>
 </head>
@@ -145,13 +148,15 @@ table.wx td .dim{color:var(--mute);font-weight:500}
   <section id="out">
     <div class="hero" id="heroBox">
       <div class="hero-top"><h2 id="hTitle"></h2><div class="hbtns">
-        <button id="share" type="button" aria-label="Share PDF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg></button>
-        <button id="refresh" type="button" aria-label="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></svg></button>
         <button id="change" type="button" aria-label="Change place or day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
       </div></div>
       <div id="hero"></div>
     </div>
     <div class="panel"><div id="fc"></div></div>
+    <div class="actions" id="actions">
+        <button class="btn alt" id="share" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>Share PDF</button>
+        <button class="btn alt" id="refresh" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Refresh</button>
+    </div>
   </section>
   <section class="planner" id="planner">
     <h3>Check the forecast</h3>
@@ -227,6 +232,7 @@ function buildDays(){
 function updateGo(){ $('#go').disabled = !(venue && dayISO); }
 
 function pick(v){
+  buildDays();
   venue = {name:v.name, sub:v.sub||'', lat:+v.lat, lon:+v.lon};
   $('#results').innerHTML='';
   $('#picked').innerHTML = `<div class="picked"><small>${esc(venue.sub || (venue.lat.toFixed(4)+', '+venue.lon.toFixed(4)))}</small>
@@ -633,7 +639,8 @@ function fitRows(){
   const n=tb.rows.length||1;
   const sb=document.getElementById('sb').getBoundingClientRect().height||0;
   const top=tb.getBoundingClientRect().top+window.scrollY;
-  const rh=Math.max(18,Math.min(44,Math.floor((window.innerHeight-top-sb-2)/n)));
+  const act=document.getElementById('actions').getBoundingClientRect().height||0;
+  const rh=Math.max(18,Math.min(44,Math.floor((window.innerHeight-top-sb-act-4)/n)));
   tb.style.setProperty('--rh',rh+'px');
   tb.closest('table').style.fontSize=Math.min(20,Math.max(12,rh*0.58))+'px';
 }
