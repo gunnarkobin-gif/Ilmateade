@@ -636,13 +636,8 @@ function renderHTML(D){
 
 function fitRows(){
   const tb=document.querySelector('#fc tbody'); if(!tb) return;
-  const n=tb.rows.length||1;
-  const sb=document.getElementById('sb').getBoundingClientRect().height||0;
-  const top=tb.getBoundingClientRect().top+window.scrollY;
-  const act=document.getElementById('actions').getBoundingClientRect().height||0;
-  const rh=Math.max(18,Math.min(44,Math.floor((window.innerHeight-top-sb-act-4)/n)));
-  tb.style.setProperty('--rh',rh+'px');
-  tb.closest('table').style.fontSize=Math.min(20,Math.max(12,rh*0.58))+'px';
+  tb.style.setProperty('--rh','40px');
+  tb.closest('table').style.fontSize='20px';
 }
 window.addEventListener('resize',()=>requestAnimationFrame(fitRows));
 
