@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Golf Weather">
+<meta name="theme-color" content="#13294B">
+<title>Golf Weather</title>
+<link rel="apple-touch-icon" id="touchIcon" href="">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--navy:#13294B;--navy2:#22406E;--turf:#2F6B3F;--bg:#EDF1F0;--ink:#1A2230;--mute:#5B6676;--line:#D3DAD8;--card:#FFFFFF}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.bar{background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 20px 18px}
+.bar h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+.bar p{margin:4px 0 0;font-size:14px;color:#B9C8DE}
+main{max-width:520px;margin:0 auto;padding:18px 16px calc(env(safe-area-inset-bottom) + 40px)}
+section{margin-bottom:22px}
+label.h{display:block;font-size:15px;font-weight:600;margin:0 0 8px}
+.row{display:flex;gap:8px}
+input[type=text],input[type=search]{flex:1;min-width:0;font:inherit;font-size:17px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+input:focus-visible,button:focus-visible{outline:3px solid #6C9BE0;outline-offset:2px}
+button{font:inherit;cursor:pointer}
+.btn{border:0;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;background:var(--navy);color:#fff}
+.btn.alt{background:var(--card);color:var(--navy);border:1px solid var(--line)}
+.btn.wide{width:100%;padding:15px;font-size:17px}
+.btn:disabled{opacity:.4}
+.list{margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.list button{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:11px 14px;color:var(--ink)}
+.list button:first-child{border-top:0}
+.list b{display:block;font-size:16px}
+.list span{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.flag{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--turf);margin-right:6px;vertical-align:1px}
+.locbtn{margin-top:8px;width:100%;border:1px solid var(--line);background:var(--card);color:var(--navy);border-radius:10px;padding:11px;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+.locbtn svg{width:16px;height:16px}
+.recent{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.recent button{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:7px 12px;font-size:14px;color:var(--navy)}
+.picked{margin-top:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--turf);border-radius:10px;padding:10px 12px}
+.picked small{display:block;color:var(--mute);font-size:13px;margin-bottom:6px}
+.days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;text-align:center;color:var(--ink);min-width:74px}
+.chip span{display:block;font-size:12px;color:var(--mute)}
+.chip b{display:block;font-size:15px;margin-top:2px}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip.on span{color:#B9C8DE}
+.status{font-size:14px;color:var(--mute);margin:10px 2px 0;min-height:1.2em}
+.status.err{color:#B3261E}
+#out{display:none;margin:0 -10px 26px}
+body.has-result .bar{display:none}
+body.has-result main{padding-top:calc(env(safe-area-inset-top) + 6px)}
+#out.show{display:block}
+.fc{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(19,41,75,.12),0 6px 18px rgba(19,41,75,.10)}
+.fc-head{background:var(--navy);color:#fff;padding:8px 10px 7px}
+.fc-head h2{margin:0;font-size:18px;line-height:1.15;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-head .l2{display:flex;justify-content:space-between;gap:8px;margin-top:2px;font-size:13px;color:#C3D1E6}
+.fc-head .l2 b{color:#fff;white-space:nowrap}
+.fc-sub{font-size:10.5px;color:#4A5568;padding:4px 8px 3px;line-height:1.3;display:flex;flex-wrap:wrap;column-gap:10px}
+.fc-sub span{white-space:nowrap}
+table.wx{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,3.4vw,16px);font-variant-numeric:tabular-nums}
+table.wx th{background:var(--navy);color:#fff;font-weight:700;font-size:.78em;line-height:1.1;padding:3px 1px;text-align:center}
+table.wx td{padding:0 1px;height:var(--rh,32px);text-align:center;white-space:nowrap;border-bottom:1px solid #D8DFE9;color:#1A2230}
+table.wx tr:nth-child(even) td{background:#EDF1F7}
+table.wx td.t{font-weight:700;color:var(--navy)}
+table.wx td.sky{text-align:left;white-space:normal;padding-left:3px}
+.sky div{display:flex;align-items:center;gap:3px;font-size:.8em;line-height:1.02;color:#2A3445}
+.sky canvas{flex:0 0 auto;width:1.75em;height:1.75em}
+table.wx td.tf{font-weight:600}
+table.wx td.vis{font-size:.8em}
+table.wx td.g{color:#1E7B34;font-weight:600}
+table.wx td.a{color:#B86E00;font-weight:600}
+table.wx td.r{color:#C62828;font-weight:800}
+.fc-foot{padding:7px 10px 10px;font-size:10.5px;line-height:1.4;color:#6B7686}
+.fc-foot .u{color:#3D4859;margin-bottom:3px}
+.actions{display:flex;gap:8px;margin:12px 10px 0}
+.actions .btn{flex:1}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>Golf Weather</h1>
+  <p>Hour-by-hour consensus from seven forecast models</p>
+</div>
+<main>
+  <section id="out">
+    <div class="fc" id="fc"></div>
+    <div class="actions">
+      <button class="btn alt" id="share">Share as PDF</button>
+      <button class="btn alt" id="refresh">Refresh</button>
+    </div>
+  </section>
+  <section>
+    <label class="h" for="q">Course</label>
+    <form class="row" id="searchForm" onsubmit="return false">
+      <input id="q" type="search" placeholder="Club name, town, or 53.45, -6.12" autocomplete="off" enterkeyhint="search">
+      <button class="btn" id="searchBtn" type="submit">Find</button>
+    </form>
+    <button class="locbtn" id="locBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Use my location</button>
+    <div id="results"></div>
+    <div id="picked"></div>
+    <div class="recent" id="recent"></div>
+  </section>
+  <section>
+    <label class="h">Day</label>
+    <div class="days" id="days"></div>
+  </section>
+  <button class="btn wide" id="go" disabled>Build forecast</button>
+  <div class="status" id="status"></div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const MODELS = [
+  {id:'ecmwf_ifs025',        name:'ECMWF',          meta:'ecmwf_ifs025'},
+  {id:'ukmo_seamless',       name:'Met Office',     meta:'ukmo_global_deterministic_10km'},
+  {id:'icon_seamless',       name:'DWD ICON',       meta:'dwd_icon'},
+  {id:'gfs_seamless',        name:'NOAA GFS',       meta:'ncep_gfs013'},
+  {id:'metno_seamless',      name:'MET Norway/Yr',  meta:'metno_nordic_pp'},
+  {id:'meteofrance_seamless',name:'Météo-France',   meta:'meteofrance_arpege_world025'},
+  {id:'gem_seamless',        name:'Env. Canada',    meta:'cmc_gem_gdps'}
+];
+const HV = ['temperature_2m','apparent_temperature','precipitation_probability','precipitation','weather_code','cloud_cover','wind_speed_10m','wind_gusts_10m','wind_direction_10m','relative_humidity_2m','visibility'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let venue = null, dayISO = null, pdfBlob = null, pdfName = 'forecast.pdf';
+
+/* ---------- UI ---------- */
+function setStatus(t, err){ const s=$('#status'); s.textContent=t||''; s.classList.toggle('err',!!err); }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function isoLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function loadRecents(){ try{ return JSON.parse(localStorage.getItem('gw_recent')||'[]'); }catch(e){ return []; } }
+function saveRecent(v){
+  try{
+    const r = loadRecents().filter(x=>!(Math.abs(x.lat-v.lat)<1e-4 && Math.abs(x.lon-v.lon)<1e-4));
+    r.unshift({name:v.name, sub:v.sub||'', lat:v.lat, lon:v.lon});
+    localStorage.setItem('gw_recent', JSON.stringify(r.slice(0,8)));
+  }catch(e){}
+  renderRecents();
+}
+function renderRecents(){
+  const box=$('#recent'); box.innerHTML='';
+  loadRecents().forEach(v=>{
+    const b=document.createElement('button'); b.type='button'; b.textContent=v.name;
+    b.onclick=()=>pick(v); box.appendChild(b);
+  });
+}
+
+function buildDays(){
+  const box=$('#days'); box.innerHTML='';
+  const now=new Date();
+  for(let i=0;i<14;i++){
+    const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);
+    const iso=isoLocal(d);
+    const b=document.createElement('button'); b.type='button'; b.className='chip';
+    const wd=d.toLocaleDateString('en-GB',{weekday:'short'});
+    b.innerHTML=`<span>${i===0?'Today':i===1?'Tomorrow':wd}</span><b>${d.getDate()} ${MON[d.getMonth()]}</b>`;
+    b.onclick=()=>{ dayISO=iso; [...box.children].forEach(c=>c.classList.toggle('on',c===b)); updateGo(); };
+    const def=now.getHours()<14?0:1; if(i===def){ dayISO=iso; b.classList.add('on'); }
+    box.appendChild(b);
+  }
+}
+function updateGo(){ $('#go').disabled = !(venue && dayISO); }
+
+function pick(v){
+  venue = {name:v.name, sub:v.sub||'', lat:+v.lat, lon:+v.lon};
+  $('#results').innerHTML='';
+  $('#picked').innerHTML = `<div class="picked"><small>${esc(venue.sub || (venue.lat.toFixed(4)+', '+venue.lon.toFixed(4)))}</small>
+    <label class="h" for="title" style="font-size:13px;font-weight:500;color:var(--mute);margin-bottom:4px">Name on forecast</label>
+    <div class="row"><input id="title" type="text" value="${esc(venue.name)}"></div></div>`;
+  setStatus(''); updateGo();
+}
+
+async function search(){
+  const q=$('#q').value.trim(); if(!q) return;
+  $('#q').blur();
+  const m=q.match(/^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,; ]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+  if(m){ pick({name:'Golf course', sub:'Coordinates '+m[1]+', '+m[2], lat:+m[1], lon:+m[2]}); return; }
+  setStatus('Searching…');
+  let res=[];
+  try{
+    const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&accept-language=en&q='+encodeURIComponent(q));
+    if(r.ok){
+      const j=await r.json();
+      res=j.map(x=>{ const parts=x.display_name.split(',').map(s=>s.trim());
+        return {name:x.name||parts[0], sub:parts.slice(1,4).join(', '), lat:+x.lat, lon:+x.lon, golf:x.type==='golf_course'}; });
+    }
+  }catch(e){}
+  if(!res.length){
+    try{
+      const name=q.replace(/\bgolf( club| links| course| resort)?\b/ig,'').trim()||q;
+      const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=en&format=json&name='+encodeURIComponent(name));
+      const j=await r.json();
+      res=(j.results||[]).map(x=>({name:x.name, sub:[x.admin1,x.country].filter(Boolean).join(', '), lat:x.latitude, lon:x.longitude}));
+    }catch(e){}
+  }
+  res.sort((a,b)=>(b.golf?1:0)-(a.golf?1:0));
+  if(!res.length){ $('#results').innerHTML=''; setStatus('No match for “'+q+'”. Try the club’s full name, or paste coordinates like 53.45, -6.12.', true); return; }
+  setStatus('');
+  const box=document.createElement('div'); box.className='list';
+  res.forEach(v=>{
+    const b=document.createElement('button'); b.type='button';
+    b.innerHTML=`<b>${v.golf?'<i class="flag"></i>':''}${esc(v.name)}</b><span>${esc(v.sub)}</span>`;
+    b.onclick=()=>pick(v); box.appendChild(b);
+  });
+  $('#results').innerHTML=''; $('#results').appendChild(box);
+}
+
+/* ---------- location ---------- */
+function getPos(){
+  return new Promise((res,rej)=>{
+    if(!navigator.geolocation) return rej(new Error('nogeo'));
+    navigator.geolocation.getCurrentPosition(p=>res(p.coords),rej,{enableHighAccuracy:false,timeout:12000,maximumAge:300000});
+  });
+}
+function distKm(a,b,c,d){
+  const R=6371,r=Math.PI/180,dl=(c-a)*r,dn=(d-b)*r;
+  const x=Math.sin(dl/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dn/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+async function nameFor(lat,lon){
+  try{
+    const d=0.03;
+    const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=15&accept-language=en&bounded=1&q=golf%20course&viewbox=${lon-d*2},${lat+d},${lon+d*2},${lat-d}`);
+    if(r.ok){
+      const g=(await r.json()).filter(x=>x.type==='golf_course'&&x.name)
+        .map(x=>({name:x.name,km:distKm(lat,lon,+x.lat,+x.lon)})).sort((a,b)=>a.km-b.km);
+      if(g.length && g[0].km<2.5) return {name:g[0].name, golf:true};
+    }
+  }catch(e){}
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&accept-language=en&lat=${lat}&lon=${lon}`);
+    if(r.ok){ const j=await r.json(), a=j.address||{};
+      const n=a.village||a.town||a.city||a.suburb||a.municipality||j.name;
+      if(n) return {name:n, sub:[a.county||a.state,a.country].filter(Boolean).join(', ')}; }
+  }catch(e){}
+  return {name:'My location'};
+}
+async function useMyLocation(auto){
+  setStatus('Finding your location…');
+  let c;
+  try{ c=await getPos(); }
+  catch(e){
+    if(auto){ const r=loadRecents(); if(r.length){ pick(r[0]); build(); return; } setStatus(''); return; }
+    setStatus(e&&e.code===1?'Location is blocked for this page. Allow it in Settings › Privacy & Security › Location Services › Safari Websites, or search for a course instead.':'Couldn’t get your location. Try again, or search for a course.',true);
+    return;
+  }
+  const lat=+c.latitude.toFixed(4), lon=+c.longitude.toFixed(4);
+  const n=await nameFor(lat,lon);
+  pick({name:n.name, sub:'Your location'+(n.golf?'':(n.sub?' near '+n.sub:'')), lat, lon});
+  build({save:!!n.golf});
+}
+
+/* ---------- data ---------- */
+async function getJSON(u){
+  const r=await fetch(u); const j=await r.json().catch(()=>({}));
+  if(!r.ok || j.error) throw new Error(j.reason || ('HTTP '+r.status));
+  return j;
+}
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+const median=a=>{ const s=[...a].sort((x,y)=>x-y), n=s.length; return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2; };
+const ok=x=>x!=null && isFinite(x);
+
+function classify(codes, cloud, mm, rain, vis){
+  const n=codes.length||1, cnt=f=>codes.filter(f).length;
+  if(rain>=30 && cnt(c=>c>=95)>=Math.max(2,n/3)) return {t:'Thunder', i:'thunder'};
+  const fog=(ok(vis)&&vis<1000) || cnt(c=>c===45||c===48)>n/2;
+  const wet=(rain>=35&&mm>=0.1) || mm>=0.3;
+  if(wet){
+    const snowy=cnt(c=>(c>=71&&c<=77)||c===85||c===86);
+    const liquid=cnt(c=>(c>=51&&c<=67)||(c>=80&&c<=82));
+    if(snowy>liquid) return {t:'Snow', i:'snow'};
+    if(snowy>0 && snowy>=liquid/2) return {t:'Sleet', i:'sleet'};
+    const shw=cnt(c=>c>=80&&c<=82), dz=cnt(c=>c>=51&&c<=57);
+    if(dz>liquid/2 && mm<0.5) return {t:'Drizzle', i:'drizzle'};
+    if(shw>=Math.max(1,liquid-shw)) return {t: mm<0.5?'Light showers':mm>=2.5?'Heavy showers':'Showers', i: mm>=2.5?'heavy':(ok(cloud)&&cloud>=85?'rain':'showers')};
+    return {t: mm<0.5?'Light rain':mm>=2.5?'Heavy rain':'Rain', i: mm>=2.5?'heavy':'rain'};
+  }
+  if(fog) return {t:'Fog', i:'fog'};
+  if(!ok(cloud)){ const m={0:5,1:25,2:55,3:95}; const cc=codes.map(c=>m[c]).filter(ok); cloud=cc.length?mean(cc):50; }
+  if(cloud<15) return {t:'Sunny', i:'sunny'};
+  if(cloud<40) return {t:'Mostly sunny', i:'mostsun'};
+  if(cloud<70) return {t:'Partly cloudy', i:'partly'};
+  if(cloud<88) return {t:'Mostly cloudy', i:'cloudy'};
+  return {t:'Overcast', i:'overcast'};
+}
+
+function consensus(multi, best){
+  const H=multi.hourly||{}, B=best.hourly||{};
+  const used=MODELS.filter(m=>{ const a=H['temperature_2m_'+m.id]; return a && a.some(ok); });
+  if(!used.length) throw new Error('No forecast models cover that day yet.');
+  const sr=best.daily&&best.daily.sunrise&&best.daily.sunrise[0];
+  const ss=best.daily&&best.daily.sunset&&best.daily.sunset[0];
+  const hm=s=>{ const t=s.slice(11,16).split(':'); return (+t[0])*60+(+t[1]); };
+  let h0=7, h1=20;
+  if(sr && ss){ h0=Math.round(hm(sr)/60); h1=Math.min(23,Math.round(hm(ss)/60)); }
+  if(h1<=h0){ h0=7; h1=20; }
+  const rows=[];
+  (B.time||[]).forEach((tm,i)=>{
+    const hour=+tm.slice(11,13); if(hour<h0||hour>h1) return;
+    const g=v=>used.map(m=>{ const a=H[v+'_'+m.id]; return a?a[i]:null; }).filter(ok);
+    const b=v=>{ const x=B[v]&&B[v][i]; return ok(x)?x:null; };
+    const val=v=>{ const a=g(v); return a.length?mean(a):b(v); };
+    const temp=val('temperature_2m'), feels=val('apparent_temperature'), hum=val('relative_humidity_2m');
+    const wind=val('wind_speed_10m'); let gust=val('wind_gusts_10m'); const cloud=val('cloud_cover');
+    const pr=g('precipitation'); const mm=pr.length?mean(pr):(b('precipitation')||0);
+    const agree=pr.length?pr.filter(x=>x>=0.1).length/pr.length:(mm>=0.1?1:0);
+    const probs=g('precipitation_probability'); const bp=b('precipitation_probability'); if(ok(bp)) probs.push(bp);
+    const rain=Math.max(0,Math.min(100,Math.round(probs.length?0.5*mean(probs)+50*agree:100*agree)));
+    let x=0,y=0,nd=0;
+    used.forEach(m=>{ const d=H['wind_direction_10m_'+m.id], s=H['wind_speed_10m_'+m.id];
+      if(d&&s&&ok(d[i])&&ok(s[i])){ const w=s[i]+0.1; x+=Math.sin(d[i]*Math.PI/180)*w; y+=Math.cos(d[i]*Math.PI/180)*w; nd++; } });
+    let dir = nd ? (Math.atan2(x,y)*180/Math.PI+360)%360 : b('wind_direction_10m');
+    const va=g('visibility'); const vis=va.length?median(va):b('visibility');
+    const codes=g('weather_code'); const bc=b('weather_code'); if(ok(bc)) codes.push(bc);
+    const sky=classify(codes, cloud, mm, rain, vis);
+    let visW;
+    if(sky.i==='fog') visW='Poor';
+    else if(!ok(vis)) visW = sky.i==='heavy'||sky.i==='snow' ? 'Moderate' : 'Good';
+    else visW = vis<4000?'Poor':vis<10000?'Moderate':'Good';
+    if(ok(wind)) gust=Math.max(ok(gust)?gust:wind, wind);
+    rows.push({hour, sky, rain, mm, temp, feels, wind, gust, dir, hum, vis:visW});
+  });
+  return {rows, used, sr, ss, uv: best.daily&&best.daily.uv_index_max?best.daily.uv_index_max[0]:null,
+          tz: best.timezone, tzAbbr: best.timezone_abbreviation, h0, h1};
+}
+
+/* ---------- drawing ---------- */
+const PW=118, PH=216, S=12; // mm page, px per mm
+const FONT='-apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif';
+const NAVY='#13294B';
+function F(c,size,w){ c.font=`${w||400} ${size}px ${FONT}`; }
+function fitSize(c,text,size,w,maxW){ F(c,size,w); const tw=c.measureText(text).width; return tw>maxW ? size*maxW/tw : size; }
+
+function sun(c,x,y,r){
+  c.save(); c.strokeStyle='#F0A500'; c.lineWidth=r*0.24; c.lineCap='round';
+  for(let k=0;k<8;k++){ const a=k*Math.PI/4; c.beginPath(); c.moveTo(x+Math.cos(a)*r*1.4,y+Math.sin(a)*r*1.4); c.lineTo(x+Math.cos(a)*r*1.85,y+Math.sin(a)*r*1.85); c.stroke(); }
+  c.fillStyle='#FFC21A'; c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill(); c.restore();
+}
+function cloud(c,x,y,w,fill){
+  c.save(); c.fillStyle=fill;
+  [[-0.2,0.02,0.18],[0.02,-0.1,0.25],[0.24,0.04,0.17]].forEach(([dx,dy,r])=>{ c.beginPath(); c.arc(x+dx*w,y+dy*w,r*w,0,Math.PI*2); c.fill(); });
+  const bx=x-0.38*w, by=y, bw=0.79*w, bh=0.21*w, rr=bh/2;
+  c.beginPath(); c.moveTo(bx+rr,by); c.lineTo(bx+bw-rr,by); c.arc(bx+bw-rr,by+rr,rr,-Math.PI/2,Math.PI/2); c.lineTo(bx+rr,by+bh); c.arc(bx+rr,by+rr,rr,Math.PI/2,Math.PI*1.5); c.fill();
+  c.restore();
+}
+function drops(c,xs,y,s,col){
+  c.save(); c.strokeStyle=col||'#2F7FD1'; c.lineWidth=s*0.075; c.lineCap='round';
+  xs.forEach(x=>{ c.beginPath(); c.moveTo(x,y); c.lineTo(x-0.06*s,y+0.17*s); c.stroke(); }); c.restore();
+}
+function flakes(c,xs,y,s){
+  c.save(); c.strokeStyle='#5E9BD6'; c.lineWidth=s*0.05; c.lineCap='round';
+  xs.forEach(x=>{ const r=0.07*s, cy=y+0.08*s; for(let k=0;k<3;k++){ const a=k*Math.PI/3; c.beginPath(); c.moveTo(x-Math.cos(a)*r,cy-Math.sin(a)*r); c.lineTo(x+Math.cos(a)*r,cy+Math.sin(a)*r); c.stroke(); } });
+  c.restore();
+}
+const CL='#BCC6D3', CM='#97A4B6', CD='#667489';
+function icon(c,kind,x,y,s){
+  switch(kind){
+    case 'sunny': sun(c,x,y,s*0.2); break;
+    case 'mostsun': sun(c,x-0.1*s,y-0.08*s,s*0.19); cloud(c,x+0.14*s,y+0.14*s,0.58*s,CL); break;
+    case 'partly': sun(c,x-0.14*s,y-0.14*s,s*0.18); cloud(c,x+0.05*s,y+0.1*s,0.82*s,CL); break;
+    case 'cloudy': cloud(c,x,y+0.05*s,0.92*s,CM); break;
+    case 'overcast': cloud(c,x+0.13*s,y-0.1*s,0.7*s,CL); cloud(c,x-0.04*s,y+0.1*s,0.86*s,CD); break;
+    case 'fog': { c.save(); c.strokeStyle=CM; c.lineWidth=s*0.08; c.lineCap='round';
+      [[-0.2,0.34],[0,0.4],[0.2,0.3]].forEach(([dy,hw],k)=>{ c.beginPath(); c.moveTo(x-hw*s+(k===1?0.05*s:0),y+dy*s); c.lineTo(x+hw*s,y+dy*s); c.stroke(); }); c.restore(); break; }
+    case 'drizzle': cloud(c,x,y-0.1*s,0.9*s,CM); c.save(); c.fillStyle='#2F7FD1'; [-0.2,0,0.2].forEach((dx,k)=>{ c.beginPath(); c.arc(x+dx*s,y+(0.24+(k%2)*0.08)*s,0.04*s,0,Math.PI*2); c.fill(); }); c.restore(); break;
+    case 'rain': cloud(c,x,y-0.12*s,0.9*s,CM); drops(c,[x-0.2*s,x+0.02*s,x+0.24*s],y+0.15*s,s); break;
+    case 'heavy': cloud(c,x,y-0.12*s,0.9*s,CD); drops(c,[x-0.27*s,x-0.09*s,x+0.09*s,x+0.27*s],y+0.15*s,s,'#1F63B0'); break;
+    case 'showers': sun(c,x+0.2*s,y-0.2*s,s*0.14); cloud(c,x-0.04*s,y-0.06*s,0.8*s,CM); drops(c,[x-0.12*s,x+0.1*s],y+0.2*s,s); break;
+    case 'thunder': cloud(c,x,y-0.12*s,0.9*s,CD); c.save(); c.fillStyle='#F0B400'; c.beginPath();
+      c.moveTo(x+0.04*s,y+0.1*s); c.lineTo(x-0.1*s,y+0.3*s); c.lineTo(x,y+0.3*s); c.lineTo(x-0.06*s,y+0.46*s); c.lineTo(x+0.12*s,y+0.24*s); c.lineTo(x+0.02*s,y+0.24*s); c.closePath(); c.fill(); c.restore(); break;
+    case 'snow': cloud(c,x,y-0.12*s,0.9*s,CM); flakes(c,[x-0.2*s,x+0.02*s,x+0.24*s],y+0.14*s,s); break;
+    case 'sleet': cloud(c,x,y-0.12*s,0.9*s,CM); drops(c,[x-0.18*s],y+0.15*s,s); flakes(c,[x+0.06*s,x+0.26*s],y+0.14*s,s); break;
+  }
+}
+function compass(d){ if(!ok(d)) return '–'; return ['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8]; }
+function hhmm(s){ return s?s.slice(11,16):'–'; }
+function wrap(c,text,maxW){
+  const words=text.split(' '), lines=[]; let cur='';
+  words.forEach(w=>{ const t=cur?cur+' '+w:w; if(c.measureText(t).width<=maxW||!cur) cur=t; else { lines.push(cur); cur=w; } });
+  if(cur) lines.push(cur); return lines;
+}
+function runLabel(meta){
+  if(!meta || !meta.last_run_initialisation_time) return '';
+  const d=new Date(meta.last_run_initialisation_time*1000);
+  return String(d.getUTCHours()).padStart(2,'0')+'Z '+d.getUTCDate()+' '+MON[d.getUTCMonth()];
+}
+
+function draw(cv, D){
+  cv.width=PW*S; cv.height=PH*S;
+  const c=cv.getContext('2d'); c.setTransform(S,0,0,S,0,0);
+  c.fillStyle='#fff'; c.fillRect(0,0,PW,PH); c.textBaseline='middle';
+  const L=4, TW=PW-2*L;
+
+  // header band
+  c.fillStyle=NAVY; c.fillRect(0,0,PW,21);
+  c.fillStyle='#fff'; c.textAlign='left';
+  F(c,fitSize(c,D.title,6.2,700,PW-10),700); c.fillText(D.title,5,8.6);
+  const [Y,Mo,Da]=D.day.split('-').map(Number); const dd=new Date(Y,Mo-1,Da);
+  const dateStr=dd.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const span=`Golf ${String(D.h0).padStart(2,'0')}:00–${String(D.h1).padStart(2,'0')}:00`;
+  F(c,3.3,700); const spanW=c.measureText(span).width;
+  c.textAlign='right'; c.fillText(span,PW-5,15.6);
+  c.fillStyle='#C3D1E6'; c.textAlign='left'; F(c,fitSize(c,dateStr,3.3,400,PW-12-spanW),400); c.fillText(dateStr,5,15.6);
+
+  // subtitle
+  const lat=D.lat, lon=D.lon;
+  const coord=`${Math.abs(lat).toFixed(4)}°${lat>=0?'N':'S'} ${Math.abs(lon).toFixed(4)}°${lon>=0?'E':'W'}`;
+  const sub=[coord, 'Sunrise '+hhmm(D.sr), 'Sunset '+hhmm(D.ss), 'UV max '+(ok(D.uv)?Math.round(D.uv):'–'), (D.tz||'')+(D.tzAbbr?' ('+D.tzAbbr+')':'')].join('    ');
+  c.fillStyle='#4A5568'; F(c,fitSize(c,sub,2.5,400,TW),400); c.fillText(sub,L,25.2);
+
+  // footer text prep
+  const unit='°C temp / feels like    Wind and gust m/s    mm = expected rain that hour    Vis: Good >10 km, Moderate 4–10 km, Poor <4 km';
+  const srcs=D.used.map(m=>{ const r=runLabel(D.metas[MODELS.indexOf(m)]); return m.name+(r?' ('+r+')':''); }).join(', ');
+  const issued=(D.issued||new Date()).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+  const srcText=`Sources: consensus of ${D.used.length} models via Open-Meteo, model runs in UTC: ${srcs}. Issued ${issued}.`;
+  F(c,2.0,400); const srcLines=wrap(c,srcText,TW);
+  const footH=4.2+srcLines.length*2.6+2.5;
+
+  // table geometry
+  const cols=[
+    {k:'time',h:['Time'],w:10.5},{k:'sky',h:['Sky'],w:24.5},{k:'rain',h:['Rain'],w:10},{k:'mm',h:['mm'],w:8.5},
+    {k:'temp',h:['°C /','feels'],w:13.2},{k:'wind',h:['Wind /','gust'],w:13.2},{k:'dir',h:['Dir'],w:7.5},{k:'hum',h:['Hum'],w:9},{k:'vis',h:['Vis'],w:13.6}
+  ];
+  let cx=L; cols.forEach(col=>{ col.x=cx; cx+=col.w; });
+  const top=28, hh=8.4, body=top+hh, bottom=PH-footH-1.5;
+  const n=D.rows.length, rh=(bottom-body)/n;
+  const ts=Math.min(3.7, rh*0.38);
+
+  c.fillStyle=NAVY; c.fillRect(L,top,TW,hh);
+  c.fillStyle='#fff'; c.textAlign='center'; F(c,2.6,700);
+  cols.forEach(col=>{ const mx=col.x+col.w/2;
+    if(col.h.length===1) c.fillText(col.h[0],mx,top+hh/2);
+    else { c.fillText(col.h[0],mx,top+hh/2-1.5); c.fillText(col.h[1],mx,top+hh/2+1.6); } });
+
+  const R=D.rows.map(r=>({
+    time:String(r.hour).padStart(2,'0')+':00',
+    rain:r.rain+'%',
+    mm:r.mm<0.05?'–':(r.mm<10?r.mm.toFixed(1):String(Math.round(r.mm))),
+    temp:(ok(r.temp)?Math.round(r.temp):'–')+' / '+(ok(r.feels)?Math.round(r.feels):'–'),
+    wind:(ok(r.wind)?Math.round(r.wind):'–')+' / '+(ok(r.gust)?Math.round(r.gust):'–'),
+    dir:compass(r.dir),
+    hum:ok(r.hum)?Math.round(r.hum)+'%':'–',
+    vis:r.vis
+  }));
+  // one font size per column so values line up
+  const colSize={}, colW={time:700,rain:800,temp:600};
+  cols.forEach(col=>{ if(col.k==='sky') return; let s=ts;
+    R.forEach(r=>{ s=Math.min(s, fitSize(c,r[col.k],ts,colW[col.k]||400,col.w-1.2)); }); colSize[col.k]=s; });
+
+  const iconS=Math.min(rh*0.72, 6.6);
+  const skyTextW=cols[1].w-iconS-2.6;
+  let skyTS=ts*0.86;
+  D.rows.forEach(r=>{ F(c,skyTS,400); wrap(c,r.sky.t,skyTextW).forEach(line=>{ skyTS=Math.min(skyTS, fitSize(c,line,skyTS,400,skyTextW)); }); });
+
+  D.rows.forEach((r,i)=>{
+    const y=body+i*rh, my=y+rh/2;
+    if(i%2){ c.fillStyle='#EDF1F7'; c.fillRect(L,y,TW,rh); }
+    c.fillStyle='#D8DFE9'; c.fillRect(L,y+rh-0.12,TW,0.12);
+    const v=R[i];
+    c.textAlign='center';
+    // time
+    c.fillStyle=NAVY; F(c,colSize.time,700); c.fillText(v.time,cols[0].x+cols[0].w/2,my);
+    // sky
+    icon(c,r.sky.i,cols[1].x+0.8+iconS/2,my,iconS);
+    c.textAlign='left'; c.fillStyle='#2A3445'; F(c,skyTS,400);
+    const lines=wrap(c,r.sky.t,skyTextW); const lh=skyTS*1.12;
+    lines.forEach((ln,k)=>c.fillText(ln,cols[1].x+iconS+1.8,my+(k-(lines.length-1)/2)*lh));
+    c.textAlign='center';
+    // rain
+    const rc=r.rain>=35?'#C62828':r.rain>=25?'#B86E00':'#1E7B34';
+    c.fillStyle=rc; F(c,colSize.rain,r.rain>=35?800:600); c.fillText(v.rain,cols[2].x+cols[2].w/2,my);
+    // rest
+    c.fillStyle='#1A2230';
+    [['mm',3],['temp',4],['wind',5],['dir',6],['hum',7],['vis',8]].forEach(([k,ci])=>{
+      F(c,colSize[k],k==='temp'?600:400); c.fillText(v[k],cols[ci].x+cols[ci].w/2,my); });
+  });
+  c.strokeStyle=NAVY; c.lineWidth=0.25; c.strokeRect(L,top,TW,bottom-top);
+
+  // footer
+  c.textAlign='left'; c.fillStyle='#3D4859';
+  F(c,fitSize(c,unit,2.3,400,TW),400); c.fillText(unit,L,bottom+2.6);
+  c.fillStyle='#6B7686'; F(c,2.0,400);
+  srcLines.forEach((ln,k)=>c.fillText(ln,L,bottom+5.6+k*2.6));
+}
+
+/* ---------- html result ---------- */
+let lastD=null;
+const TS='\u2009/\u2009';
+function iconCanvas(kind){
+  const px=28, dpr=Math.max(2,window.devicePixelRatio||2);
+  const cv=document.createElement('canvas'); cv.width=cv.height=px*dpr;
+  const c=cv.getContext('2d'); c.scale(dpr,dpr); icon(c,kind,px/2,px/2,px); return cv;
+}
+function renderHTML(D){
+  const [Y,Mo,Da]=D.day.split('-').map(Number);
+  const dateStr=new Date(Y,Mo-1,Da).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const p2=n=>String(n).padStart(2,'0');
+  const coord=`${Math.abs(D.lat).toFixed(4)}°${D.lat>=0?'N':'S'} ${Math.abs(D.lon).toFixed(4)}°${D.lon>=0?'E':'W'}`;
+  const srcs=D.used.map(m=>{ const r=runLabel(D.metas[MODELS.indexOf(m)]); return m.name+(r?' ('+r+')':''); }).join(', ');
+  const issued=D.issued.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+  const r0=v=>ok(v)?Math.round(v):'–';
+  let rows='';
+  D.rows.forEach((r,i)=>{
+    const rc=r.rain>=35?'r':r.rain>=25?'a':'g';
+    const mm=r.mm<0.05?'–':(r.mm<10?r.mm.toFixed(1):Math.round(r.mm));
+    rows+=`<tr><td class="t">${p2(r.hour)}:00</td><td class="sky"><div data-i="${i}"><span>${esc(r.sky.t)}</span></div></td>`+
+      `<td class="${rc}">${r.rain}%</td><td>${mm}</td><td class="tf">${r0(r.temp)}${TS}${r0(r.feels)}</td>`+
+      `<td>${r0(r.wind)}${TS}${r0(r.gust)}</td><td>${compass(r.dir)}</td><td>${ok(r.hum)?Math.round(r.hum)+'%':'–'}</td><td class="vis">${r.vis}</td></tr>`;
+  });
+  $('#fc').innerHTML=`
+    <div class="fc-head"><h2>${esc(D.title)}</h2><div class="l2"><span>${dateStr}</span><b>Golf ${p2(D.h0)}:00–${p2(D.h1)}:00</b></div></div>
+    <div class="fc-sub"><span>${coord}</span><span>Sunrise ${hhmm(D.sr)}</span><span>Sunset ${hhmm(D.ss)}</span><span>UV max ${ok(D.uv)?Math.round(D.uv):'–'}</span><span>${esc(D.tz||'')}${D.tzAbbr?' ('+esc(D.tzAbbr)+')':''}</span></div>
+    <table class="wx">
+      <colgroup><col style="width:10%"><col style="width:20.5%"><col style="width:9.5%"><col style="width:7.5%"><col style="width:12%"><col style="width:12%"><col style="width:7%"><col style="width:8.5%"><col style="width:13%"></colgroup>
+      <thead><tr><th>Time</th><th>Sky</th><th>Rain</th><th>mm</th><th>°C /<br>feels</th><th>Wind /<br>gust</th><th>Dir</th><th>Hum</th><th>Vis</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="fc-foot"><div class="u">°C temp / feels like. Wind and gust m/s. mm = expected rain that hour. Vis: Good &gt;10 km, Moderate 4–10 km, Poor &lt;4 km.</div>
+    Consensus of ${D.used.length} models via Open-Meteo, runs in UTC: ${esc(srcs)}. Issued ${issued}.</div>`;
+  $('#fc').querySelectorAll('.sky div').forEach(d=>d.prepend(iconCanvas(D.rows[+d.dataset.i].sky.i)));
+}
+
+function fitRows(){
+  const tb=document.querySelector('#fc tbody'); if(!tb) return;
+  const n=tb.rows.length||1;
+  const top=tb.getBoundingClientRect().top+window.scrollY;
+  const avail=window.innerHeight-top-4;
+  const rh=Math.max(25,Math.min(44,Math.floor(avail/n)));
+  tb.style.setProperty('--rh',rh+'px');
+}
+window.addEventListener('resize',()=>requestAnimationFrame(fitRows));
+
+function makePdf(){
+  if(!lastD || !window.jspdf) return null;
+  const cv=document.createElement('canvas'); draw(cv,lastD);
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:[PW,PH],orientation:'portrait',compress:true});
+  doc.addImage(cv.toDataURL('image/png'),'PNG',0,0,PW,PH,undefined,'FAST');
+  return doc.output('blob');
+}
+
+/* ---------- build ---------- */
+async function build(opts){
+  if(!venue||!dayISO) return;
+  const keep=!(opts&&opts.save===false);
+  const title=($('#title')&&$('#title').value.trim())||venue.name;
+  $('#go').disabled=true; setStatus('Fetching forecasts from '+MODELS.length+' models…');
+  try{
+    const base=`https://api.open-meteo.com/v1/forecast?latitude=${venue.lat.toFixed(4)}&longitude=${venue.lon.toFixed(4)}&timezone=auto&wind_speed_unit=ms&start_date=${dayISO}&end_date=${dayISO}`;
+    const metaP=Promise.all(MODELS.map(m=>fetch(`https://api.open-meteo.com/data/${m.meta}/static/meta.json`).then(r=>r.ok?r.json():null).catch(()=>null)));
+    const [multi,best]=await Promise.all([
+      getJSON(base+'&hourly='+HV.join(',')+'&models='+MODELS.map(m=>m.id).join(',')),
+      getJSON(base+'&hourly='+HV.join(',')+'&daily=sunrise,sunset,uv_index_max')
+    ]);
+    const metas=await Promise.race([metaP,new Promise(r=>setTimeout(()=>r(MODELS.map(()=>null)),4000))]);
+    const D=consensus(multi,best);
+    if(!D.rows.length) throw new Error('No hourly data for that day.');
+    Object.assign(D,{title, day:dayISO, lat:venue.lat, lon:venue.lon, metas});
+    D.issued=new Date();
+    lastD=D; pdfBlob=null;
+    document.body.classList.add('has-result');
+    $('#out').classList.add('show');
+    renderHTML(D);
+    window.scrollTo(0,0);
+    fitRows();
+    if(keep) saveRecent({...venue, name:title});
+    pdfName=(title+' '+dayISO+' forecast').replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,' ').trim()+'.pdf';
+    setStatus('');
+  }catch(e){
+    const msg=String(e.message||e);
+    setStatus(/fetch|network|load/i.test(msg)?'Couldn’t reach the forecast service. Check your connection and build again.':
+      /date|range|parameter/i.test(msg)?'That day is outside the forecast range. Pick a nearer day.':msg, true);
+  }finally{ updateGo(); }
+}
+
+function openPdf(){
+  if(!pdfBlob) return;
+  const u=URL.createObjectURL(pdfBlob); const a=document.createElement('a');
+  a.href=u; a.download=pdfName; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
+async function sharePdf(){
+  if(!pdfBlob) pdfBlob=makePdf();
+  if(!pdfBlob){ setStatus('The PDF tool didn’t load. Check your connection and try again.',true); return; }
+  const f=new File([pdfBlob],pdfName,{type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f],title:pdfName}); }catch(e){} }
+  else openPdf();
+}
+
+function makeTouchIcon(){
+  try{
+    const cv=document.createElement('canvas'); cv.width=cv.height=180; const c=cv.getContext('2d');
+    c.fillStyle=NAVY; c.fillRect(0,0,180,180);
+    c.fillStyle='#2F6B3F'; c.fillRect(0,132,180,48);
+    icon(c,'partly',92,78,120);
+    $('#touchIcon').href=cv.toDataURL('image/png');
+  }catch(e){}
+}
+
+$('#searchForm').addEventListener('submit',search);
+$('#go').addEventListener('click',build);
+$('#share').addEventListener('click',sharePdf);
+$('#refresh').addEventListener('click',()=>build({save:false}));
+$('#locBtn').addEventListener('click',()=>useMyLocation(false));
+buildDays(); renderRecents(); makeTouchIcon();
+useMyLocation(true);
+</script>
+</body>
+</html>
