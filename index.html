@@ -62,16 +62,14 @@ body.has-result main{padding-top:calc(env(safe-area-inset-top) + 6px)}
 .fc-head .l2 b{color:#fff;white-space:nowrap}
 .fc-sub{font-size:10.5px;color:#4A5568;padding:4px 8px 3px;line-height:1.3;display:flex;flex-wrap:wrap;column-gap:10px}
 .fc-sub span{white-space:nowrap}
-table.wx{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(11px,3.4vw,16px);font-variant-numeric:tabular-nums}
-table.wx th{background:var(--navy);color:#fff;font-weight:700;font-size:.78em;line-height:1.1;padding:3px 1px;text-align:center}
+table.wx{width:100%;border-collapse:collapse;table-layout:fixed;font-size:clamp(14px,4.6vw,20px);font-variant-numeric:tabular-nums}
+table.wx th{background:var(--navy);color:#fff;font-weight:700;font-size:.7em;line-height:1.1;padding:3px 1px;text-align:center}
 table.wx td{padding:0 1px;height:var(--rh,32px);text-align:center;white-space:nowrap;border-bottom:1px solid #D8DFE9;color:#1A2230}
 table.wx tr:nth-child(even) td{background:#EDF1F7}
 table.wx td.t{font-weight:700;color:var(--navy)}
-table.wx td.sky{text-align:left;white-space:normal;padding-left:3px}
-.sky div{display:flex;align-items:center;gap:3px;font-size:.8em;line-height:1.02;color:#2A3445}
-.sky canvas{flex:0 0 auto;width:1.75em;height:1.75em}
+table.wx td.sky canvas{display:block;margin:0 auto;width:min(1.7em,calc(var(--rh,34px) - 3px));height:min(1.7em,calc(var(--rh,34px) - 3px))}
+.arr{display:block;margin:0 auto;width:1.15em;height:1.15em;color:var(--navy)}
 table.wx td.tf{font-weight:600}
-table.wx td.vis{font-size:.8em}
 table.wx td.g{color:#1E7B34;font-weight:600}
 table.wx td.a{color:#B86E00;font-weight:600}
 table.wx td.r{color:#C62828;font-weight:800}
@@ -509,21 +507,22 @@ function renderHTML(D){
   D.rows.forEach((r,i)=>{
     const rc=r.rain>=35?'r':r.rain>=25?'a':'g';
     const mm=r.mm<0.05?'–':(r.mm<10?r.mm.toFixed(1):Math.round(r.mm));
-    rows+=`<tr><td class="t">${p2(r.hour)}:00</td><td class="sky"><div data-i="${i}"><span>${esc(r.sky.t)}</span></div></td>`+
+    const arrow=ok(r.dir)?`<svg class="arr" viewBox="0 0 24 24" style="transform:rotate(${Math.round((r.dir+180)%360)}deg)" role="img" aria-label="Wind from ${compass(r.dir)}"><path d="M12 2.5l7 9.5h-4.6v9.5H9.6V12H5z" fill="currentColor"/></svg>`:'–';
+    rows+=`<tr><td class="t">${p2(r.hour)}:00</td><td class="sky" data-i="${i}" title="${esc(r.sky.t)}"></td>`+
       `<td class="${rc}">${r.rain}%</td><td>${mm}</td><td class="tf">${r0(r.temp)}${TS}${r0(r.feels)}</td>`+
-      `<td>${r0(r.wind)}${TS}${r0(r.gust)}</td><td>${compass(r.dir)}</td><td>${ok(r.hum)?Math.round(r.hum)+'%':'–'}</td><td class="vis">${r.vis}</td></tr>`;
+      `<td>${r0(r.wind)}${TS}${r0(r.gust)}</td><td>${arrow}</td></tr>`;
   });
   $('#fc').innerHTML=`
     <div class="fc-head"><h2>${esc(D.title)}</h2><div class="l2"><span>${dateStr}</span><b>Golf ${p2(D.h0)}:00–${p2(D.h1)}:00</b></div></div>
     <div class="fc-sub"><span>${coord}</span><span>Sunrise ${hhmm(D.sr)}</span><span>Sunset ${hhmm(D.ss)}</span><span>UV max ${ok(D.uv)?Math.round(D.uv):'–'}</span><span>${esc(D.tz||'')}${D.tzAbbr?' ('+esc(D.tzAbbr)+')':''}</span></div>
     <table class="wx">
-      <colgroup><col style="width:10%"><col style="width:20.5%"><col style="width:9.5%"><col style="width:7.5%"><col style="width:12%"><col style="width:12%"><col style="width:7%"><col style="width:8.5%"><col style="width:13%"></colgroup>
-      <thead><tr><th>Time</th><th>Sky</th><th>Rain</th><th>mm</th><th>°C /<br>feels</th><th>Wind /<br>gust</th><th>Dir</th><th>Hum</th><th>Vis</th></tr></thead>
+      <colgroup><col style="width:15.5%"><col style="width:12%"><col style="width:13.5%"><col style="width:11%"><col style="width:19%"><col style="width:18%"><col style="width:11%"></colgroup>
+      <thead><tr><th>Time</th><th>Sky</th><th>Rain</th><th>mm</th><th>°C /<br>feels</th><th>Wind /<br>gust</th><th>Dir</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="fc-foot"><div class="u">°C temp / feels like. Wind and gust m/s. mm = expected rain that hour. Vis: Good &gt;10 km, Moderate 4–10 km, Poor &lt;4 km.</div>
+    <div class="fc-foot"><div class="u">°C temp / feels like. Wind and gust m/s; arrow points where the wind blows to. mm = expected rain that hour.</div>
     Consensus of ${D.used.length} models via Open-Meteo, runs in UTC: ${esc(srcs)}. Issued ${issued}.</div>`;
-  $('#fc').querySelectorAll('.sky div').forEach(d=>d.prepend(iconCanvas(D.rows[+d.dataset.i].sky.i)));
+  $('#fc').querySelectorAll('td.sky').forEach(d=>d.appendChild(iconCanvas(D.rows[+d.dataset.i].sky.i)));
 }
 
 function fitRows(){
@@ -531,8 +530,9 @@ function fitRows(){
   const n=tb.rows.length||1;
   const top=tb.getBoundingClientRect().top+window.scrollY;
   const avail=window.innerHeight-top-4;
-  const rh=Math.max(25,Math.min(44,Math.floor(avail/n)));
+  const rh=Math.max(23,Math.min(46,Math.floor(avail/n)));
   tb.style.setProperty('--rh',rh+'px');
+  tb.style.fontSize=Math.min(20,Math.max(14,rh*0.6))+'px';
 }
 window.addEventListener('resize',()=>requestAnimationFrame(fitRows));
 
